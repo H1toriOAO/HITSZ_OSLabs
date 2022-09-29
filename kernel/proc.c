@@ -694,3 +694,29 @@ procdump(void)
     printf("\n");
   }
 }
+
+uint64 count_process(void) {
+    uint64 cnt = 0;
+
+    for (struct proc *p = proc; p < &proc[NPROC]; p++) {
+        // acquire(&p -> lock);
+        if (p -> state == UNUSED) {
+            cnt++;
+        }
+        // release(&p -> lock);
+    }
+
+    return cnt;
+}
+
+uint64 count_available_fd(void) {
+    uint64 cnt = 0;
+
+    for (int fd = 0; fd < NOFILE; fd++) {
+        if (myproc() -> ofile[fd] != 0) {
+            cnt++;
+        }
+    }
+
+    return cnt;
+}

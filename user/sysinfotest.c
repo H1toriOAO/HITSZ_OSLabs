@@ -125,8 +125,10 @@ void testfd(){
   struct sysinfo info;
   sinfo(&info);
   uint64 nfd = info.freefd;
+  printf("nfd = %d\n", nfd);
 
   int fd = open("cat",O_RDONLY);
+  printf("%d\n", fd);
 
   sinfo(&info);
   if(info.freefd != nfd + 1) {
@@ -135,7 +137,7 @@ void testfd(){
   }
   
   for(int i = 0; i < 10; i++){
-    dup(fd);
+    printf("%d\n", dup(fd));
   }
   sinfo(&info);
   if(info.freefd != nfd + 11) {
