@@ -125,29 +125,27 @@ void testfd(){
   struct sysinfo info;
   sinfo(&info);
   uint64 nfd = info.freefd;
-  printf("nfd = %d\n", nfd);
 
   int fd = open("cat",O_RDONLY);
-  printf("%d\n", fd);
 
   sinfo(&info);
-  if(info.freefd != nfd + 1) {
+  if(info.freefd != nfd - 1) {
     printf("sysinfotest: FAIL freefd is %d instead of %d\n", info.freefd, nfd+1);
     exit(1);
   }
   
   for(int i = 0; i < 10; i++){
-    printf("%d\n", dup(fd));
+    dup(fd);
   }
   sinfo(&info);
-  if(info.freefd != nfd + 11) {
+  if(info.freefd != nfd - 11) {
     printf("sysinfotest: FAIL freefd is %d instead of %d\n", info.freefd, nfd+11);
     exit(1);
   }
 
   close(fd);
   sinfo(&info);
-  if(info.freefd != nfd + 10) {
+  if(info.freefd != nfd - 10) {
     printf("sysinfotest: FAIL freefd is %d instead of %d\n", info.freefd, nfd+10);
     exit(1);
   }

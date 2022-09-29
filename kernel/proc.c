@@ -713,7 +713,7 @@ uint64 count_available_fd(void) {
     uint64 cnt = 0;
 
     for (int fd = 0; fd < NOFILE; fd++) {
-        if (myproc() -> ofile[fd] != 0) {
+        if (myproc() -> ofile[fd] == 0) {
             cnt++;
         }
     }
