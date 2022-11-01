@@ -21,14 +21,12 @@ struct run {
 struct {
     struct spinlock lock;
     struct run* freelist;
-    char lockName[7];
 } kmem[NCPU];
 
 void kinit()
 {
     for (int i = 0; i < NCPU; i++) {
-        snprintf(kmem[i].lockName, sizeof(kmem[i].lockName), "kmem_%d", i);
-        initlock(&kmem[i].lock, kmem[i].lockName);
+        initlock(&kmem[i].lock, "kmem");
     }
 
     freerange(end, (void*)PHYSTOP);
@@ -84,8 +82,6 @@ void* kalloc(void)
     if (r) {
         kmem[cpuID].freelist = r->next;
     } else {
-        int successFlag = 0;
-
         for (int i = 0; i < NCPU; i++) {
             if (i == cpuID) {
                 continue;
@@ -93,34 +89,15 @@ void* kalloc(void)
 
             acquire(&kmem[i].lock);
 
-            struct run* p = kmem[i].freelist;
-            if (p) {
-                struct run *fp = p, *pre = p;
-                while (fp && fp->next) {
-                    fp = fp->next->next;
-                    pre = p;
-                    p = p->next;
-                }
-
-                kmem[cpuID].freelist = kmem[i].freelist;
-                if (p == kmem[i].freelist) {
-                    kmem[i].freelist = 0;
-                } else {
-                    kmem[i].freelist = p;
-                    pre->next = 0;
-                }
-
-                successFlag = 1;
-            }
-
-            release(&kmem[i].lock);
-
-            if (successFlag) {
-                r = kmem[cpuID].freelist;
-                kmem[cpuID].freelist = r->next;
+            r = kmem[i].freelist;
+            if (r) {
+                kmem[i].freelist = r->next;
+                release(&kmem[i].lock);
 
                 break;
             }
+
+            release(&kmem[i].lock);
         }
     }
 
