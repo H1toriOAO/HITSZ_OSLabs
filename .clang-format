@@ -1,3 +1,2 @@
 BasedOnStyle: WebKit
 SortIncludes: false
-AlignConsecutiveMacros: true
